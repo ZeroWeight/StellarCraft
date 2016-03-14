@@ -22,18 +22,19 @@ void AIMain()
     const Status* status = GetStatus();
     int self_id = status->objects[0].id;
     if (GetTime() - last_time >= 1) {
-	const Map* map = GetMap();
-	Position curr_pos = status->objects[0].pos;
-	bool moved = false;
-	for (int i = 0; i < map->objects_number; ++i) {
-	    Object object = map->objects[i];
-	    if (object.type == ENERGY || object.type == ADVANCED_ENERGY) {
-		moveTo(self_id, curr_pos, object.pos);
-		moved = true;
-		break;
-	    }
-	}
-	if (!moved) // move toward center
-	    moveTo(self_id, curr_pos, { kMapSize / 2, kMapSize / 2, kMapSize / 2 });
+        last_time = GetTime();
+        const Map* map = GetMap();
+        Position curr_pos = status->objects[0].pos;
+        bool moved = false;
+        for (int i = 0; i < map->objects_number; ++i) {
+            Object object = map->objects[i];
+            if (object.type == ENERGY || object.type == ADVANCED_ENERGY) {
+                moveTo(self_id, curr_pos, object.pos);
+                moved = true;
+                break;
+            }
+        }
+        if (!moved) // move toward center
+            moveTo(self_id, curr_pos, { kMapSize / 2, kMapSize / 2, kMapSize / 2 });
     }
 }
