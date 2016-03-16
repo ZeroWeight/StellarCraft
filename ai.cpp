@@ -42,7 +42,7 @@ private:
 	PlayerObject my;
 public:
 	AR_GAME();
-	int MoveTo(AR_VECTOR);
+	int MoveToSPEED(AR_VECTOR);
 	Object operator[](int);
 	int cost(SkillType);
 	int Update(SkillType);
@@ -50,7 +50,23 @@ public:
 	int short_attack();
 	int dash();
 	int shield();
-
+	int health();
+	int maxhealth();
+	int vision();
+	double radius();
+	double radius(Object);
+	AR_VECTOR speed();
+	AR_VECTOR position();
+	AR_VECTOR position(Object);
+	int long_attack_casting();
+	int long_attack_casting(Object);
+	int shield_time();
+	int shield_time(Object);
+	int dash_time();
+	int ability();
+	int skill_level(SkillType);
+	int skill_cd(SkillType);
+	int check(Object);
 };
 
 
@@ -102,7 +118,9 @@ void AR_VECTOR::operator=(Position P)
 	z = P.z;
 }
 AR_VECTOR::AR_VECTOR(Position p) {
-	AR_VECTOR(p.x, p.y, p.z);
+	x=p.x;
+	y=p.y;
+	z=p.z;
 }
 AR_VECTOR operator+(const AR_VECTOR&A, const AR_VECTOR&B) {
 	return AR_VECTOR(A.x + B.x, A.y + B.y, A.z + B.z);
@@ -142,7 +160,7 @@ AR_GAME::AR_GAME()
 	myteam = GetStatus()->team_id;
 	my = GetStatus()->objects[0];
 }
-int AR_GAME::MoveTo(AR_VECTOR P)
+int AR_GAME::MoveToSPEED(AR_VECTOR P)
 {
 	if (!(P == my.pos)) {
 		Move(this->my.id, P.cast());
@@ -200,6 +218,78 @@ int AR_GAME::shield() {
 		return 0;
 	}
 	else return -1;
+}
+int AR_GAME::health()
+{
+	return my.health;
+}
+int AR_GAME::maxhealth()
+{
+	return my.max_health;
+}
+int AR_GAME::vision()
+{
+	return my.vision;
+}
+double AR_GAME::radius()
+{
+	return my.radius;
+}
+double AR_GAME::radius(Object aim)
+{
+	return aim.radius;
+}
+AR_VECTOR AR_GAME::speed()
+{
+	return AR_VECTOR(my.speed);
+}
+AR_VECTOR AR_GAME::position()
+{
+	return AR_VECTOR(my.pos);
+}
+AR_VECTOR AR_GAME::position(Object aim)
+{
+	return AR_VECTOR(aim.pos);
+}
+int AR_GAME::long_attack_casting()
+{
+	return my.long_attack_casting;
+}
+int AR_GAME::long_attack_casting(Object aim)
+{
+	return aim.long_attack_casting;
+}
+int AR_GAME::shield_time()
+{
+	return my.shield_time;
+}
+int AR_GAME::shield_time(Object aim)
+{
+	return aim.shield_time;
+}
+int AR_GAME::dash_time()
+{
+	return my.dash_time;
+}
+int AR_GAME::ability()
+{
+	return my.ability;
+}
+int AR_GAME::skill_level(SkillType skill)
+{
+	return my.skill_level[skill];
+}
+int AR_GAME::skill_cd(SkillType skill)
+{
+	return my.skill_cd[skill];
+}
+int AR_GAME::check(Object aim)
+{
+	if (aim.type != PLAYER) return aim.type;
+	else {
+		if (aim.team_id == myteam) return -1;
+		else return 100;
+	}
 }
 int AR_GAME::dash() {
 	if (my.skill_level[DASH] && my.skill_cd[DASH] == 0) {
