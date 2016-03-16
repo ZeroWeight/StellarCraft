@@ -1,211 +1,211 @@
-#include"teamstyle17.h"
-#include<stdio.h>
-#include<stdlib.h>
-#include<math.h>
-/**************V1.1.0***********************/
-/*	µ×²ã·â×°Óë·½·¨ BY Zero Weight 2016/3/15 11:30	*/
-/*	ËùÓĞµ×²ã±äÁ¿ÒÔARÎª×ÖÍ·£¬Çë×¢ÒâÃüÃûÖØ¸´		*/
-/*	½á¹¹Ìå·â×°·½Ê½²Î¼ûÊ¹ÓÃÊÖ²á								*/
-/*	¼Ù¶¨Ë«·½¸÷×ÔÖ»¿ØÖÆÒ»¸öÇò£¬Ö»ÓĞÁ½·½¾ºÕù		*/
-/*	³¡ÉÏµÀ¾ß£ºE(nergy)ÄÜÁ¿Ô´£¬
-	A(dvancedEnergy£©¹âÖ®ËíµÀ£¬D(evour)ÍÌÊÉÕß		*/
-/*********************************************/
+ï»¿#include "teamstyle17.h"
+#include<cmath>
+#include<iostream>
+using namespace std;
+enum AR_BORDER {
+	NONE = 0,
+	LEFT = 1 << 0,
+	RIGHT = 1 << 1,
+	BEHIND = 1 << 2,
+	FRONT = 1 << 3,
+	DOWN = 1 << 4,
+	UP = 1 << 5,
+};
+class AR_VECTOR {
+private:
+	double x;
+	double y;
+	double z;
+public:
+	AR_VECTOR(Position);
+	AR_VECTOR();
+	AR_VECTOR(double, double, double);
+	double length();
+	int border(double);
+	Position cast();
+	void operator=(AR_VECTOR&);
+	void operator=(Position);
+	friend double operator^ (AR_VECTOR&, AR_VECTOR&);
+	friend int operator==(const AR_VECTOR&, const AR_VECTOR&);
+	friend AR_VECTOR operator*(const AR_VECTOR&, const AR_VECTOR&);
+	friend AR_VECTOR operator*(const int, const AR_VECTOR&);
+	friend AR_VECTOR operator*(const AR_VECTOR&, const int);
+	friend AR_VECTOR operator+(const AR_VECTOR&, const AR_VECTOR&);
+	friend AR_VECTOR operator-(const AR_VECTOR&, const AR_VECTOR&);
+	friend double operator,(const AR_VECTOR&, const AR_VECTOR&);
+	friend ostream& operator<<(ostream&, AR_VECTOR&);
+};
+class AR_GAME {
+private:
+	const Map* map;
+	int myteam;
+	PlayerObject my;
+public:
+	AR_GAME();
+	int MoveTo(AR_VECTOR);
+	Object operator[](int);
+	int cost(SkillType);
+	int Update(SkillType);
+	int long_attack(Object);
+	int short_attack();
+	int dash();
+	int shield();
+
+};
 
 
-
-
-
-/******************µ×²ã¶ÔÏó*******************/
-//Ëã·¨Ö´ĞĞÅĞ¾İ£¬ÓÃÀ´¼ÇÂ¼µ±Ç°»ØºÏÊıÓëÍ¬²½½ÃÕı	ÑùÀı£ºAR_GO=GetTime£¨£©	Í¬²½Ê±¼ä
-int AR_GO=-1;
-//±¾·½²Ù×÷¶ÔÏó£¬ÓÃÀ´Ìá¹©±¾·½¸÷ÏîÊôĞÔ     ÑùÀı£ºAR_my.pos£» µÃµ½±¾·½Î»ÖÃ
-PlayerObject AR_my;	
-//¶Ô·½²Ù×÷¶ÔÏó£¬ÓÃÀ´Ìá¹©¶Ô·½¸÷ÏîÊôĞÔ     ÑùÀı£ºAR_opposite.pos£» µÃµ½¶Ô·½Î»ÖÃ
-Object AR_opposite;	
-//±¾·½¶ÓÆì£¬Ò»°ã²»»áÓÃµ½£¬¶ÓÎéÑ¡Ôñ·ÖÅäÒÑÔÚµ×²ãÍê³É
-int AR_MYTeam;		
-//¶Ô·½ÊÇ·ñÔÚÊÓÒ°ÄÚ£¬Ö»ÓĞÎªtrueµÄÊ±ºò AR_opposite²ÅÓĞÒâÒå
-bool AR_OppositeIN;		
-//boss¶ÔÏó£¬ÓÃÀ´Ìá¹©boss¸÷ÏîÊôĞÔ     ÑùÀı£ºAR_boss.pos µÃµ½bossÎ»ÖÃ
-Object AR_boss;					
-//bossÊÇ·ñÔÚÊÓÒ°ÄÚ£¬Ö»ÓĞÎªtrueµÄÊ±ºò AR_boss²ÅÓĞÒâÒå
-bool AR_BossIN;			
-//³õÊ¼ÖµÎªÁã£¬ÓÃÀ´¼ÇÂ¼ÊÓÒ°ÄÚµÄE£¬AºÍD     ÑùÀı£ºÓÃÀ´Ìá¹©Ñ­»·½Ú
-int AR_NUME,AR_NUMA,AR_NUMD;	
-//³¡ÉÏE,A,D¶ÔÏóÊı×é£¬ÒÑÔÚµ×²ã¶ÔµØÍ¼¶ÔÏó·ÖÀà	ÑùÀı£ºAR_E[0].pos	µÃµ½Ò»¸öÄÜÁ¿Ô´Î»ÖÃ
-Object AR_E[kMaxObjectNumber],	AR_A[kMaxObjectNumber],AR_D[kMaxObjectNumber];
-//µØÍ¼£¬Ò»°ã²»»áÓÃµ½£¬ÒÑ¾­ÔÚµ×²ã¶ÔµØÍ¼³¹µ×½âÎö	ÑùÀı£ºAR_map->objectnumber µÃµ½¶ÔÏó×ÜÊı
-const Map* AR_map;
-//µ÷ÊÔÏòÁ¿£¬ÓÃÓÚÎŞ·½ÏòÒÆ¶¯µÄÒ»¸öÔİÓÃ·½Ïò£¬ÎªµØÍ¼ÖĞĞÄ
-const Position AR_Center={kMapSize/2,kMapSize/2,kMapSize/2};
-//
-Position AR_speed = AR_Center;
-/******************³õÊ¼»¯º¯Êı*******************/
-//³õÊ¼»¯º¯Êı£¬±ØĞëÔÚAIMain×î¿ªÊ¼µ÷ÓÃ
-void initialize(){		
-	AR_BossIN=AR_OppositeIN=AR_NUMA=AR_NUMD=AR_NUME=0;
-	AR_map=GetMap();
-	AR_my=GetStatus()->objects[0];
-	AR_MYTeam=GetStatus()->team_id;
-	for(int i=0;i<AR_map->objects_number;i++){
-		switch(AR_map->objects[i].type){
-		case BOSS:{
-			AR_BossIN=1;
-			AR_boss=AR_map->objects[i];
-			break;
-				  }
-		case ENERGY:{
-			AR_E[AR_NUME]=AR_map->objects[i];
-			AR_NUME++;
-			break;
-					}
-		case ADVANCED_ENERGY:{
-			AR_A[AR_NUMA]=AR_map->objects[i];
-			AR_NUMA++;
-			break;
-					}
-		case DEVOUR:{
-			AR_D[AR_NUMD]=AR_map->objects[i];
-			AR_NUMD++;
-			break;
-					}
-		default:{
-			if(AR_map->objects[i].team_id!=AR_MYTeam&&AR_map->objects[i].team_id!=-2) {
-				AR_OppositeIN=1;
-				AR_opposite=AR_map->objects[i];
-			}
-				}
-		}
-	}
-}
-void wait() {
-	int i;
-	for (i = 0;i < 10000000000;i++);
+void AIMain() {
+	AR_GAME G;
+	G.MoveTo(AR_VECTOR(500, 500, 500));
 }
 
 
-
-
-/******************ÏòÁ¿º¯Êı*******************/
-//ÇóÒ»¸öÏòÁ¿µÄÄ£³¤     ÑùÀı£ºlength(A)==||A||;
-double length(Position a){							
-	return sqrt(a.x*a.x+a.y*a.y+a.z*a.z);
+AR_VECTOR::AR_VECTOR() {
+	x = (kMapSize >> 1);
+	y = (kMapSize >> 1);
+	z = (kMapSize >> 1);
 }
-//ÇóÁ½¸öÏòÁ¿Ö®¼äµÄ·½ÏòÏòÁ¿    ÑùÀı£ºPointTo(A,B)==AB;´ÓAµ½B
-Position PointTo(Position src,Position des){
-	Position temp={des.x-src.x,des.y-src.y,des.z-src.z};
-	return(temp);
+AR_VECTOR::AR_VECTOR(double a, double b, double c) {
+	x = a;
+	y = b;
+	z = c;
 }
-//ÇóÁ½¸öµãÖ®¼äµÄ¾àÀë     ÑùÀı£ºdistance(A,B)==||AB||;
-double distance(Position src,Position des){
-	return length(PointTo(src,des));
+double AR_VECTOR::length()
+{
+	return sqrt((this->x)*(this->x)+(this->y)*(this->y)+(this->z)*(this->z));
 }
-//±È½ÏÁ½ÏòÁ¿ÊÇ·ñÏàµÈ,Îó²îÎª0.001
-bool equal(Position A, Position B) {
-	return distance(A, B) < 0.001;
+int AR_VECTOR::border(double d)
+{
+	int R = NONE;
+	if (this->x < d) R |= LEFT;
+	else if (kMapSize - this->x < d) R |= RIGHT;
+	if (this->y < d) R |= BEHIND;
+	else if (kMapSize - this->y < d) R |= FRONT;
+	if (this->z < d) R |= DOWN;
+	else if (kMapSize - this->z < d) R |= UP;
+	return R;
 }
-//ÏòÁ¿Êı³Ë   ÑùÀı£ºmultiple(k,A)==kA;
-Position multiple(double times,Position a){
-	Position temp={a.x*times,a.y*times,a.z*times};
-	return temp;
+Position AR_VECTOR::cast()
+{
+	return{ this->x, this->y, this->z };
 }
-
-
-
-
-
-/******************ÔË¶¯·½·¨*******************/
-//ÒÔ×î´óËÙ¶ÈÏòÖ¸¶¨Ä¿±êÒÆ¶¯     ÑùÀı£ºMoveTo(A);ÒÔ×î´óËÙ¶ÈÏòAÒÆ¶¯
-//·â×°Ê±±£Ö¤ÈôAÎªµ±Ç°Ê¸Á¿·µ»Ø-1£¬²»Ö´ĞĞÈÎºÎ²Ù×÷£¬·ñÔò·µ»Ø0
-int MoveTo(Position des){
-	if ((!equal(des,AR_my.pos))&&(!equal(des,AR_speed))) {
-		Move(AR_my.id, multiple(kMaxMoveSpeed / distance(AR_my.pos, des), PointTo(AR_my.pos, des)));
-		AR_speed = des;
+void AR_VECTOR::operator=(AR_VECTOR &A)
+{
+	this->x = A.x;
+	this->y = A.y;
+	this->z = A.z;
+}
+void AR_VECTOR::operator=(Position P)
+{
+	x = P.x;
+	y = P.y;
+	z = P.z;
+}
+AR_VECTOR::AR_VECTOR(Position p) {
+	AR_VECTOR(p.x, p.y, p.z);
+}
+AR_VECTOR operator+(const AR_VECTOR&A, const AR_VECTOR&B) {
+	return AR_VECTOR(A.x + B.x, A.y + B.y, A.z + B.z);
+}
+AR_VECTOR operator-(const AR_VECTOR&A, const AR_VECTOR&B) {
+	return AR_VECTOR(A.x - B.x, A.y - B.y, A.z - B.z);
+}
+double operator,(const AR_VECTOR & A, const AR_VECTOR & B)
+{
+	return (A.x*B.x + A.y*B.y + A.z*B.z);
+}
+ostream & operator<<(ostream & os, AR_VECTOR & p)
+{
+	os << p.x << '\t' << p.y << '\t' << p.z << '\t' << p.length() << endl;
+	return os;
+}
+AR_VECTOR operator*(const AR_VECTOR&A, const int k) {
+	return AR_VECTOR(A.x*k, A.y*k, A.z*k);
+}
+AR_VECTOR operator*(const int k, const AR_VECTOR& A) {
+	return (A*k);
+}
+double operator^(AR_VECTOR &A, AR_VECTOR &B)
+{
+	return (A, B) / (A.length()*B.length());
+}
+int operator==(const AR_VECTOR &A, const AR_VECTOR &B)
+{
+	return (A - B).length() < 0.01;
+}
+AR_VECTOR operator*(const AR_VECTOR& A, const AR_VECTOR& B) {
+	return AR_VECTOR(A.y*B.z - A.z*B.y, A.z*B.x - A.x*B.z, A.x*B.y - A.y - B.x);
+}
+AR_GAME::AR_GAME()
+{
+	map = GetMap();
+	myteam = GetStatus()->team_id;
+	my = GetStatus()->objects[0];
+}
+int AR_GAME::MoveTo(AR_VECTOR P)
+{
+	if (!(P == my.pos)) {
+		Move(this->my.id, P.cast());
 		return 0;
 	}
 	else return -1;
 }
-
-
-
-
-
-/******************Éı¼¶¿Æ¼¼(²»ÍêÕû£©*******************/
-//Éı¼¶¿Æ¼¼º¯Êı£¨²âÊÔ£©£¬³É¹¦Éı¼¶·µ»Ø0£¬Ê§°Ü²»Ö´ĞĞ£¬·µ»Ø-1
-//¼¼ÄÜ¼ûÊÖ²á£¬²»ÄÜÉı¼¶HEALTH
-//ÔÚ¼¼ÄÜµãÊıµÄ¼ÆËãÉÏ´æÒÉ
-int cost(SkillType skill) {
-	if (AR_my.skill_level[skill]) {
-		return (kBasicSkillPrice[skill] << AR_my.skill_level[skill]);
+Object  AR_GAME::operator[](int n)
+{
+	return map->objects[n];
+}
+int AR_GAME::cost(SkillType skill) {
+	if (my.skill_level[skill]) {
+		return (kBasicSkillPrice[skill] << my.skill_level[skill]);
 	}
 	else {
 		int i, count;
 		for (i = 0, count = 0;i < kSkillTypes;i++) {
-			if (AR_my.skill_level[i]) count++;
+			if (my.skill_level[i]) count++;
 		}
 		return(kBasicSkillPrice[skill] << count);
 	}
 }
-int update(SkillType skill) {
-	if (AR_my.ability >= cost(skill))
-	{
-		UpgradeSkill(AR_my.id, skill);
+int AR_GAME::Update(SkillType skill)
+{
+	if (my.ability >= cost(skill)) {
+		UpgradeSkill(my.id, skill);
 		return 0;
 	}
 	else return -1;
 }
-
-
-
-/******************¼¼ÄÜÊ¹ÓÃ*******************/
-//ÒÔÏÂ¼¼ÄÜÊ¹ÓÃÍê±Ï×¢Òâ¼ì²éÊ¹ÓÃÊÇ·ñ³É¹¦£¬0Îª³É¹¦£¬-1Ê§°Ü
-int Lattack(Object aim) {
-	if (AR_my.skill_level[LONG_ATTACK] && AR_my.skill_cd[LONG_ATTACK] == 0
-		&&distance(AR_my.pos,aim.pos)<kLongAttackRange[AR_my.skill_level[LONG_ATTACK]] ){
-		LongAttack(AR_my.id, aim.id);
-		printf("LONG ATTACK AT\t%d\tLEVEL\t%d\n", GetTime(), AR_my.skill_level[LONG_ATTACK]);
+int AR_GAME::long_attack(Object aim) {
+	if (my.skill_level[LONG_ATTACK] && my.skill_cd[LONG_ATTACK] == 0
+		&& (AR_VECTOR(my.pos)-AR_VECTOR(aim.pos)).length()<kLongAttackRange[my.skill_level[LONG_ATTACK]]) {
+		LongAttack(my.id, aim.id);
+		printf("LONG ATTACK AT\t%d\tLEVEL\t%d\n", GetTime(), my.skill_level[LONG_ATTACK]);
 		return 0;
 	}
 	else return -1;
 }
-int Sattack() {
-	if (AR_my.skill_level[SHORT_ATTACK] && (AR_my.skill_cd[SHORT_ATTACK] == 0)) {
-		ShortAttack(AR_my.id);
-		printf("SHORT ATTACK AT\t%d\tLEVEL\t%d\n", GetTime(), AR_my.skill_level[SHORT_ATTACK]);
+int AR_GAME::short_attack() {
+	if (my.skill_level[SHORT_ATTACK] && (my.skill_cd[SHORT_ATTACK] == 0)) {
+		ShortAttack(my.id);
+		printf("SHORT ATTACK AT\t%d\tLEVEL\t%d\n", GetTime(), my.skill_level[SHORT_ATTACK]);
 		return 0;
 	}
 	else {
 		return -1;
 	}
 }
-int shield() {
-	if (AR_my.skill_level[SHIELD] && AR_my.skill_cd[SHIELD] == 0) {
-		Shield(AR_my.id);
-		printf("SHIELD AT\t%d\tLEVEL\t%d\n", GetTime(), AR_my.skill_level[SHIELD]);
+int AR_GAME::shield() {
+	if (my.skill_level[SHIELD] && my.skill_cd[SHIELD] == 0) {
+		Shield(my.id);
+		printf("SHIELD AT\t%d\tLEVEL\t%d\n", GetTime(), my.skill_level[SHIELD]);
 		return 0;
 	}
 	else return -1;
 }
-int dash() {
-	if (AR_my.skill_level[DASH] && AR_my.skill_cd[DASH] == 0) {
-		Dash(AR_my.id);
-		printf("DASH AT\t\t%d\tLEVEL\t%d\n", GetTime(), AR_my.skill_level[DASH]);
+int AR_GAME::dash() {
+	if (my.skill_level[DASH] && my.skill_cd[DASH] == 0) {
+		Dash(my.id);
+		printf("%d\tDASH AT\t\t%d\tLEVEL\t%d\n", my.id, GetTime(), my.skill_level[DASH]);
 		return 0;
 	}
 	else return -1;
-}
-/**********µ×²ã·â×°½áÊø**********/
-//ºËĞÄº¯Êı
-void AIMain(){
-	initialize();
-	update(SHIELD);
-	update(SHORT_ATTACK);
-	update(DASH);
-	dash();
-	Sattack();
-	shield();
-	if (AR_BossIN&&AR_my.radius > 1.5*AR_boss.radius) MoveTo(AR_boss.pos);
-	if(AR_NUMA)MoveTo(AR_A[0].pos);
-	else if(AR_NUME)MoveTo(AR_E[0].pos);
-	else MoveTo(AR_Center);
 }
