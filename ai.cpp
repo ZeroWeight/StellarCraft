@@ -28,8 +28,8 @@ public:
 	friend double operator^ (AR_VECTOR&, AR_VECTOR&);
 	friend int operator==(const AR_VECTOR&, const AR_VECTOR&);
 	friend AR_VECTOR operator*(const AR_VECTOR&, const AR_VECTOR&);
-	friend AR_VECTOR operator*(const int, const AR_VECTOR&);
-	friend AR_VECTOR operator*(const AR_VECTOR&, const int);
+	friend AR_VECTOR operator*(const double, const AR_VECTOR&);
+	friend AR_VECTOR operator*(const AR_VECTOR&, const double);
 	friend AR_VECTOR operator+(const AR_VECTOR&, const AR_VECTOR&);
 	friend AR_VECTOR operator-(const AR_VECTOR&, const AR_VECTOR&);
 	friend double operator,(const AR_VECTOR&, const AR_VECTOR&);
@@ -43,6 +43,7 @@ private:
 public:
 	AR_GAME();
 	int MoveInSPEED(AR_VECTOR);
+	int MoveTo(AR_VECTOR);
 	Object operator[](int);
 	int cost(SkillType);
 	int Update(SkillType);
@@ -72,7 +73,7 @@ public:
 
 void AIMain() {
 	AR_GAME G;
-	G.MoveInSPEED(AR_VECTOR(500, 500, 500));
+	G.MoveTo(AR_VECTOR(0,0,0));
 }
 
 
@@ -137,10 +138,10 @@ ostream & operator<<(ostream & os, AR_VECTOR & p)
 	os << p.x << '\t' << p.y << '\t' << p.z << '\t' << p.length() << endl;
 	return os;
 }
-AR_VECTOR operator*(const AR_VECTOR&A, const int k) {
+AR_VECTOR operator*(const AR_VECTOR&A, const double k) {
 	return AR_VECTOR(A.x*k, A.y*k, A.z*k);
 }
-AR_VECTOR operator*(const int k, const AR_VECTOR& A) {
+AR_VECTOR operator*(const double k, const AR_VECTOR& A) {
 	return (A*k);
 }
 double operator^(AR_VECTOR &A, AR_VECTOR &B)
@@ -162,11 +163,19 @@ AR_GAME::AR_GAME()
 }
 int AR_GAME::MoveInSPEED(AR_VECTOR P)
 {
-	if (!(P == my.pos)) {
+	if (!(P == my.speed)) {
 		Move(this->my.id, P.cast());
 		return 0;
 	}
 	else return -1;
+}
+int AR_GAME::MoveTo(AR_VECTOR p)
+{
+	if (p == my.pos) return -1;
+	double k = ((kMaxMoveSpeed + kDashSpeed[my.skill_level[DASH]]) / (p - my.pos).length());
+	AR_VECTOR a = (k*(p - my.pos));
+	cout << a;
+	return MoveInSPEED(a);
 }
 Object  AR_GAME::operator[](int n)
 {
@@ -194,7 +203,7 @@ int AR_GAME::Update(SkillType skill)
 }
 int AR_GAME::long_attack(Object aim) {
 	if (my.skill_level[LONG_ATTACK] && my.skill_cd[LONG_ATTACK] == 0
-		&& (AR_VECTOR(my.pos)-AR_VECTOR(aim.pos)).length()<kLongAttackRange[my.skill_level[LONG_ATTACK]]) {
+		&& (AR_VECTOR(my.pos)-AR_VECTOR(aim.pos)).length()<=kLongAttackRange[my.skill_level[LONG_ATTACK]]) {
 		LongAttack(my.id, aim.id);
 		printf("LONG ATTACK AT\t%d\tLEVEL\t%d\n", GetTime(), my.skill_level[LONG_ATTACK]);
 		return 0;
