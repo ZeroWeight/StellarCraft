@@ -42,7 +42,7 @@ private:
 	PlayerObject my;
 public:
 	AR_GAME();
-	int MoveToSPEED(AR_VECTOR);
+	int MoveInSPEED(AR_VECTOR);
 	Object operator[](int);
 	int cost(SkillType);
 	int Update(SkillType);
@@ -72,7 +72,7 @@ public:
 
 void AIMain() {
 	AR_GAME G;
-	G.MoveTo(AR_VECTOR(500, 500, 500));
+	G.MoveInSPEED(AR_VECTOR(500, 500, 500));
 }
 
 
@@ -152,7 +152,7 @@ int operator==(const AR_VECTOR &A, const AR_VECTOR &B)
 	return (A - B).length() < 0.01;
 }
 AR_VECTOR operator*(const AR_VECTOR& A, const AR_VECTOR& B) {
-	return AR_VECTOR(A.y*B.z - A.z*B.y, A.z*B.x - A.x*B.z, A.x*B.y - A.y - B.x);
+	return AR_VECTOR(A.y*B.z - A.z*B.y, A.z*B.x - A.x*B.z, A.x*B.y - A.y * B.x);
 }
 AR_GAME::AR_GAME()
 {
@@ -160,7 +160,7 @@ AR_GAME::AR_GAME()
 	myteam = GetStatus()->team_id;
 	my = GetStatus()->objects[0];
 }
-int AR_GAME::MoveToSPEED(AR_VECTOR P)
+int AR_GAME::MoveInSPEED(AR_VECTOR P)
 {
 	if (!(P == my.pos)) {
 		Move(this->my.id, P.cast());
