@@ -1,6 +1,9 @@
-﻿#include "teamstyle17.h"
+#include "teamstyle17.h"
 #include<cmath>
 #include<iostream>
+#include<deque>
+#include<vector>
+#include<list>
 using namespace std;
 enum AR_BORDER {
 	NONE = 0,
@@ -41,7 +44,10 @@ private:
 	int myteam;
 	PlayerObject GET (int);
 public:
+	
+	double distance(Object, int i = 0);
 	int number;
+	int object_number;
 	AR_GAME();
 	int MoveInSPEED(AR_VECTOR, int i = 0);
 	int MoveTo(AR_VECTOR,int i=0 );
@@ -71,27 +77,155 @@ public:
 	int check(Object);
 };
 
+
+
+
+
+static deque<AR_VECTOR> queue;
+static AR_VECTOR e(0,0,0);//speed
+static vector<AR_VECTOR> vec;
+static list<int>test;
+static bool border=false;
+static bool center = false;
 void AIMain() {
+	int i = 0;
+	int obj=-1;
+	int boss = -1;
+	e = AR_VECTOR(0, 0, 0);
 	AR_GAME G;
-	G.MoveTo(AR_VECTOR(0,0,0));
-	G.ability();
-	G.check(G[0]);
-	G.cost(DASH);
-	G.dash(2);
-	G.dash_time();
-	G.health(1);
-	G.long_attack(G[1]);
-	G.long_attack_casting();
-	G.maxhealth();
-	G.long_attack_casting(G[1]);
-	G.number;
-	G.position(G[3]);
-	G.position(3);
-	G.position();
-	G.radius();
-	G.skill_cd(HEALTH_UP);
-	G.shield();
+	queue.clear();
+	vec.clear();
+	if (!border) {
+		if (G.position().border(1.2*G.radius())&LEFT) {
+			e = e + AR_VECTOR(100, 0, 0);
+			border = true;
+		}
+		else if (G.position().border(1.2*G.radius())&RIGHT) {
+			e = e - AR_VECTOR(100, 0, 0);
+			border = true;
+		}
+		if (G.position().border(1.2*G.radius())&UP) {
+			e = e - AR_VECTOR(0, 0, 100);
+			border = true;
+		}
+		else if (G.position().border(1.2*G.radius())&DOWN) {
+			e = e + AR_VECTOR(0, 0, 100);
+			border = true;
+		}
+		if (G.position().border(1.2*G.radius())&BEHIND) {
+			e = e + AR_VECTOR(0, 100, 0);
+			border = true;
+		}
+		else if (G.position().border(1.2*G.radius())&FRONT) {
+			e = e - AR_VECTOR(0, 100, 0);
+			border = true;
+		}
+	}
+	else {
+		if ((G.position().border(2.5*G.radius())&LEFT)) {
+			e = e + AR_VECTOR(100, 0, 0);
+			i++;
+		}
+		else if ((G.position().border(2.5*G.radius())&RIGHT)) {
+			e = e - AR_VECTOR(100, 0, 0);
+			i++;
+		}
+		if ((G.position().border(2.5*G.radius())&UP)) {
+			e = e - AR_VECTOR(0, 0, 100);
+			i++;
+		}
+		else if ((G.position().border(2.5*G.radius())&DOWN)) {
+			e = e + AR_VECTOR(0, 0, 100);
+			i++;
+		}
+		if ((G.position().border(2.5*G.radius())&BEHIND)) {
+			e = e + AR_VECTOR(0, 100, 0);
+			i++;
+		}
+		else if ((G.position().border(2.5*G.radius())&FRONT)) {
+			e = e - AR_VECTOR(0, 100, 0);
+			i++;
+		}
+		if (!i) border = false;
+	}
+	if (!border) {
+		if (G.position().length() < 2000) {
+			e = G.position();center = true;
+		}
+		else if (G.position().length() > 6000) {
+			e = AR_VECTOR(0, 0, 0) - G.position();center = true; 
+		}
+	}
+	cout << border << "\tSEP\t" << e;
+	for (int i = 0;i < G.object_number;i++) {
+		switch (G.check(G[i])) {
+		case ENERGY: {
+			if (((center || border)&&((G.position(G[i]) ^ e)>0.7))||(!center)||(!border)) {
+				if (G.distance(G[i]) < 3 * G.radius()) queue.push_back(G[i].pos);
+			}
+			break;
+		}
+		case ADVANCED_ENERGY: {
+			if (((center || border)&&((G.position(G[i]) ^ e)>0.3)) ||( !center)||(!border)) {
+				if (G.distance(G[i]) < 5 * G.radius()) queue.push_back(G[i].pos);
+			}
+			break;
+		}
+		case DEVOUR: {
+			vec.push_back(G.position(G[i]));
+			break;
+		}
+		case 250: {
+			obj = i;
+			break;
+		}
+		}
+	}
+	
+	while (true) {
+		if (queue.empty()) break;
+		if ((queue.front() - G.position()).length() < 0.8*G.radius()) queue.pop_front();
+		if (queue.empty()) break;
+		if((queue.front()^G.position())<-0.5) queue.pop_front();
+		else break;
+	}
+	G.Update(LONG_ATTACK);
+	if (boss >= 0) {
+		if (G.radius() > G.radius(G[boss])) {
+			G.MoveTo(G.position(G[boss]));
+			return;
+		}
+		else {
+			if (G.distance(G[boss]) < G.radius() * 3) {
+				G.MoveInSPEED(G.position() - G.position(G[boss]));
+			}
+		}
+	}
+	if (obj >= 0) {
+		if (G.radius() > G.radius(G[obj])) {
+			G.MoveTo(G.position(G[obj]));
+			return;
+		}
+	}
+	if (obj >= 0 ) {
+		if (G.distance(G[obj]) < kLongAttackRange[G.skill_level(LONG_ATTACK)]) {
+		cout << "Long Attack Ready" << endl;
+		G.long_attack(G[obj]);
+		return;
+		}
+	}
+	if (border || queue.empty()) {
+		G.MoveInSPEED(e);return;
+	}
+	else G.MoveTo(queue.front());
+	return;
 }
+
+
+
+
+
+
 
 AR_VECTOR::AR_VECTOR() {
 	x = (kMapSize >> 1);
@@ -176,12 +310,14 @@ AR_GAME::AR_GAME()
 	map = GetMap();
 	myteam = GetStatus()->team_id;
 	number = GetStatus()->objects_number;
+	object_number = map->objects_number;
 }
 int AR_GAME::MoveInSPEED(AR_VECTOR P, int i)
 {
 	PlayerObject p = GET(i);
-	if (!(P == p.speed)) {
-		Move(p.id, P.cast());
+	AR_VECTOR Q = P*((kMaxMoveSpeed + kDashSpeed[p.skill_level[DASH]]) / P.length());
+	if (! (Q== p.speed)) {
+		Move(p.id, Q.cast());
 		return 0;
 	}
 	else return -1;
@@ -192,7 +328,6 @@ int AR_GAME::MoveTo(AR_VECTOR p,int i)
 	if (p == my.pos) return -1;
 	double k = ((kMaxMoveSpeed + kDashSpeed[my.skill_level[DASH]]) / (p - my.pos).length());
 	AR_VECTOR a = (k*(p - my.pos));
-	cout << a;
 	return MoveInSPEED(a,i);
 }
 Object  AR_GAME::operator[](int n)
@@ -202,6 +337,10 @@ Object  AR_GAME::operator[](int n)
 PlayerObject AR_GAME::GET(int n)
 {
 	return GetStatus()->objects[n];
+}
+double AR_GAME::distance(Object aim, int i)
+{
+	return (position(i) - position(aim)).length();
 }
 int AR_GAME::cost(SkillType skill,int i) {
 	PlayerObject my = GET(i);
