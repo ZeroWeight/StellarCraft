@@ -7,11 +7,12 @@ int update()//Zero Weight
 void move(Position)//Zero Weight
 double length(Position)//Zero Weight
 double dist(Position,Position)//Zero Weight
-int long_attack(Object)//Peter Lu
-int short_attack(Object)//Peter Lu
-int sheild(Object)//Peter Lu
-int dash(Object)//Peter Lu
+int long_attack(const Object&)//Peter Lu
+int short_attack(const Object&)//Peter Lu
+int shield()//Peter Lu
+int dash()//Peter Lu
 variables
 int Archer=-1;
 PlayerObject me;
-
+double boss_radius;
+int team_id;    // remains constant once initialized
