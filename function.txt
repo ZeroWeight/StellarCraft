@@ -1,0 +1,17 @@
+functions
+void huang_gai()//Archer
+void yuan_shu()//Archer
+void guo_jia()//YQY
+void zhang_fei()//Peter LU
+int update()//Zero Weight
+void move(Position)//Zero Weight
+double length(Position)//Zero Weight
+double dist(Position,Position)//Zero Weight
+int long_attack(Object)//Peter Lu
+int short_attack(Object)//Peter Lu
+int sheild(Object)//Peter Lu
+int dash(Object)//Peter Lu
+variables
+int Archer=-1;
+PlayerObject me;
+

@@ -1,0 +1,17 @@
+void Huang_Gai(){
+ find the nearest advanced energy;
+ if (not find any advanced energy){
+ find the nearest energy;
+}
+ if(find a near boss or devour){
+ return and use enshaw;
+ }
+ if(find a near weak opponent){
+reutrn and use Zhang_Fei;
+}
+else if (find a near strong opponent){
+return and use enshaw;
+}
+if (getenough skillpoint){
+return and use greedy;
+}

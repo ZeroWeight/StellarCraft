@@ -1,0 +1,7 @@
+void greedy(){
+find the nearest energy or the nearest advanced energy;
+if(find the devour or a near boss){
+return and use enshaw;
+}
+if(find the weak opponent){
+return and use ZhangFei;

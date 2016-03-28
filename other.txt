@@ -1,0 +1,4 @@
+1.update skills	void updateskill()
+2.border?
+3.math function
+4.use skills	void useskill(object)

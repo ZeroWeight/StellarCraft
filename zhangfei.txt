@@ -1,0 +1,5 @@
+void ZhangFei(){
+attack any way(if in)
+if(may face a devour or may face a boss){
+return and use enshaw;
+}

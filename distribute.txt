@@ -1,0 +1,14 @@
+MAY DO THESE TO DISTRIBUTE TASKS
+enshaw to YQY
+greedy, huanggai to Archer
+other to peter ZeroWeight
+zhangfei to LU
+
+
+
+void enshaw();
+int Archer=-1
+0	call greedy()
+1	enshaw()
+2	zhangfei()
+int Update();

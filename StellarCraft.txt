@@ -1,0 +1,25 @@
+void AIMain(){
+  Huang_Gai();
+  while(true){
+      switch(Archer){
+   case 0:
+      greedy();
+     break;
+   case 1: 
+      enshawn();
+      break;
+  case 2:
+      Zhanng_Fei();
+      break;
+}
+}
+
+
+
+int Archer=-1;
+PlayerObject me;
+int boss_r=2000;
+//return
+Move(me.id,{0,0,0});
+printf("%d\n",Archer);
+while(true);

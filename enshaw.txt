@@ -1,0 +1,8 @@
+void enshaw(){
+ enshaw just like before;
+ if (there is not any devour and boss){
+return and use greedy;
+}
+if (there is a weak opponent){
+return and use Zhang_Fei
+}
