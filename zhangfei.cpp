@@ -36,6 +36,9 @@ int long_attack(const Object& target)
 	if (me.long_attack_casting != -1) {
 		return -1;
 	}
+	if (target.shield_time > 0) {
+		return -1;
+	}
 	if (Distance(target.pos, me.pos) - target.radius - me.radius
 			> kLongAttackRange[me.skill_level[LONG_ATTACK]]) {
 		return -1;
@@ -50,6 +53,9 @@ int long_attack(const Object& target)
 int short_attack(const Object& target)
 {
 	if (me.skill_cd[SHORT_ATTACK] == -1) {
+		return -1;
+	}
+	if (target.shield_time > 0) {
 		return -1;
 	}
 	if (Distance(target.pos, me.pos) - target.radius - me.radius
