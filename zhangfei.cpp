@@ -246,7 +246,9 @@ void zhang_fei() {
 
 	if (short_attack(oppo) == -1) {
 		if (long_attack(oppo) == -1) {
-			dash();
+			if (shield() == -1) {
+				dash();
+			}
 		}
 	}
 	double k = me.radius / oppo.radius;
